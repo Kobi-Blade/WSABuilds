@@ -64,14 +64,13 @@ If ((Check-Windows11) -And (Test-CommandExist 'pwsh.exe')) {
 }
 
 If (-Not (Test-Administrator)) {
-    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
     $Proc = Start-Process -PassThru -Verb RunAs $pwsh -Args "-ExecutionPolicy Bypass -Command Set-Location '$PSScriptRoot'; &'$PSCommandPath' EVAL"
     If ($null -Ne $Proc) {
         $Proc.WaitForExit()
     }
     If ($null -Eq $Proc -Or $Proc.ExitCode -Ne 0) {
-        Write-Warning "Failed to launch start as Administrator`r`nPress any key to exit"
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+        Write-Warning "Failed to launch as Administrator`r`nPress any key to exit"
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
     exit
 }
@@ -79,6 +78,7 @@ ElseIf (($args.Count -Eq 1) -And ($args[0] -Eq "EVAL")) {
     Start-Process $pwsh -NoNewWindow -Args "-ExecutionPolicy Bypass -Command Set-Location '$PSScriptRoot'; &'$PSCommandPath'"
     exit
 }
+
 
 $FileList = Get-Content -Path .\filelist.txt
 If (((Test-Path -Path $FileList) -Eq $false).Count) {
@@ -98,7 +98,8 @@ If (((Test-Path -Path "MakePri.ps1") -And (Test-Path -Path "makepri.exe")) -Eq $
     $Host.UI.RawUI.WindowTitle = "Installing MagiskOnWSA...."
 }
 
-reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
+# Ask users to enable developer mode, rather than go behind their back
+# reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock" /t REG_DWORD /f /v "AllowDevelopmentWithoutDevLicense" /d "1"
 
 # When using PowerShell which is installed with MSIX
 # Get-WindowsOptionalFeature and Enable-WindowsOptionalFeature will fail
